@@ -37,3 +37,15 @@ def test_repo_names_stay_in_the_org(settings: Settings, name: str) -> None:
     with pytest.raises(ValueError):
         GitHub(settings).repo(name)
     assert GitHub(settings).repo("example-org/docker-sonarr") == "example-org/docker-sonarr"
+
+
+def test_an_app_not_installed_on_the_org_is_named(settings: Settings, monkeypatch: pytest.MonkeyPatch) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/app":
+            return httpx.Response(200, json={"slug": "other-app", "id": 42})
+        return httpx.Response(404, json={"message": "Not Found"})
+
+    gh = GitHub(settings, httpx.Client(transport=httpx.MockTransport(handler)))
+    monkeypatch.setattr(gh, "app_jwt", lambda: "jwt")
+    with pytest.raises(RuntimeError, match=r"'other-app' \(id 42.*not installed on example-org"):
+        gh.token()

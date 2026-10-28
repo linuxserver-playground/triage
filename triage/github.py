@@ -39,6 +39,13 @@ class GitHub:
             return self._token[0]
         auth = {**HEADERS, "Authorization": f"Bearer {self.app_jwt()}"}
         response = self.client.get(f"{API}/orgs/{self.settings.org}/installation", headers=auth)
+        if response.status_code == 404:
+            # The key and App ID authenticate, but as an App that is not installed here: name it.
+            app = self.client.get(f"{API}/app", headers=auth).json()
+            raise RuntimeError(
+                f"the App {app.get('slug')!r} (id {app.get('id')}, from TRIAGE_APP_ID={self.settings.app_id} and "
+                f"app.pem) is not installed on {self.settings.org}"
+            )
         response.raise_for_status()
         installation = response.json()["id"]
         response = self.client.post(f"{API}/app/installations/{installation}/access_tokens", headers=auth)
