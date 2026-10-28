@@ -18,11 +18,18 @@ comment says it was written by an AI and that a maintainer will follow up. The d
    docs (shallow clones refreshed hourly, so the Pages rate limit is never touched), any file of an org repository,
    and an org-wide issue search. A pull request comes with its diff and its build report comment. CONVENTIONS.md
    and an index of every image sit in the cached system prompt.
-4. **Post.** The model returns structured output only: whether to post, a classification, labels from the
-   allowlist and the comment. The bot's own code posts it with the AI footer and sets the labels.
+4. **Research.** When the answer depends on the upstream application, Sonnet asks a research assistant (Haiku
+   5.5, a twentieth of the price) up to three precise questions. It searches the web, fetches pages and reads any
+   public GitHub repository: upstream code at the version we ship, releases, what changed between two versions,
+   upstream issues. It returns a short answer with links; Sonnet weighs it and writes.
+5. **Post.** The model returns structured output only: whether to post, a classification, labels from the
+   allowlist and the comment: a short reply on top, the evidence with its links in a collapsed "What I checked"
+   section. The bot's own code posts it with the AI footer and sets the labels.
 
-Issue and comment text is untrusted. One core rule in the prompt says so, and the structure does the rest: the
-model has no tool that writes, so the worst a successful injection can do is one odd comment a maintainer sees.
+Issue and comment text, and everything the research assistant reads on the web, is untrusted. One core rule in
+each prompt says so, and the structure does the rest: neither model has a tool that writes, and neither holds
+anything private (GitHub reads are public repositories only), so the worst a successful injection can do is one odd
+comment a maintainer sees.
 
 ## Identity and cost
 

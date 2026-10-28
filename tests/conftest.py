@@ -54,7 +54,8 @@ class FakeGitHub:
         self.thread_comments: dict[tuple[str, int], list[dict[str, Any]]] = {}
         self.posted: list[tuple[str, int, str]] = []
         self.labelled: list[tuple[str, int, list[str]]] = []
-        self.files: dict[str, str] = {"CONVENTIONS.md": "# Conventions\n"}
+        self.files: dict[str, str] = {"CONVENTIONS.md": "# Conventions\n", "src/db.cs": "open()\nretry()"}
+        self.searches: list[tuple[str, bool]] = []
 
     def login(self) -> str:
         return BOT
@@ -77,8 +78,23 @@ class FakeGitHub:
     def file(self, repo: str, path: str, ref: str | None = None) -> str:
         return self.files[path]
 
-    def search_issues(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
+    def search_issues(self, query: str, limit: int = 10, org_only: bool = True) -> list[dict[str, Any]]:
+        self.searches.append((query, org_only))
         return [{"html_url": f"https://github.com/{REPO}/issues/1", "state": "closed", "title": "Database is locked"}]
+
+    def public_repo(self, name: str) -> str:
+        return name
+
+    def releases(self, repo: str, limit: int = 10) -> list[dict[str, Any]]:
+        return [{"tag_name": "v4.0.21", "published_at": "2030-01-01", "html_url": "u", "body": "Fix database lock"}]
+
+    def compare(self, repo: str, base: str, head: str) -> dict[str, Any]:
+        return {
+            "html_url": "c",
+            "total_commits": 1,
+            "commits": [{"sha": "abcdef123", "commit": {"message": "Retry locked database\n\nbody"}}],
+            "files": [{"filename": "src/db.cs", "status": "modified", "additions": 3, "deletions": 1}],
+        }
 
     def post_comment(self, repo: str, number: int, body: str) -> dict[str, Any]:
         self.posted.append((repo, number, body))
@@ -107,9 +123,15 @@ def answer(post: bool = True, labels: list[str] | None = None, comment: str = "T
     return json.dumps({"post": post, "classification": "bug", "labels": labels or ["needs-info"], "comment": comment})
 
 
-def response(stop_reason: str, *content: SimpleNamespace, model: str = "claude-sonnet-5-5") -> SimpleNamespace:
+def response(
+    stop_reason: str, *content: SimpleNamespace, model: str = "claude-sonnet-5-5", searches: int = 0, prompt: int = 0
+) -> SimpleNamespace:
     usage = SimpleNamespace(
-        input_tokens=1000, output_tokens=200, cache_read_input_tokens=50_000, cache_creation_input_tokens=0
+        input_tokens=1000 + prompt,
+        output_tokens=200,
+        cache_read_input_tokens=50_000,
+        cache_creation_input_tokens=0,
+        server_tool_use=SimpleNamespace(web_search_requests=searches),
     )
     return SimpleNamespace(stop_reason=stop_reason, content=list(content), usage=usage, model=model)
 

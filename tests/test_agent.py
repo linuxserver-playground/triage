@@ -2,8 +2,9 @@ from typing import Any
 
 import pytest
 
-from triage.agent import LABELS, TOOLS, price, render_thread
+from triage.agent import LABELS, TOOLS, render_thread
 from triage.config import Settings
+from triage.pricing import price
 from triage.sources import Sources
 
 from .conftest import BOT, REPO, FakeClaude, FakeGitHub, answer, make_agent, response, text_block, tool_block

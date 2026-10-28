@@ -62,6 +62,8 @@ Everything but the two secrets is a code default (`triage/config.py`). To overri
 | `TRIAGE_MONTHLY_CAP_USD` | `100` | the bot stops answering for the month once its own running total reaches this |
 | `TRIAGE_MODEL` | `claude-sonnet-5-5` | |
 | `TRIAGE_EFFORT` | `medium` | |
+| `TRIAGE_RESEARCH_MODEL` | `claude-haiku-5-5` | the research assistant Sonnet hands upstream questions to |
+| `TRIAGE_MAX_RESEARCH` | `3` | research questions Sonnet may ask per thread; `0` turns research off |
 | `TRIAGE_POLL_SECONDS` | `30` | how often control's open issues and pull requests are read |
 | `TRIAGE_MAX_FOLLOWUPS` | `3` | replies to the author after the first response, per thread |
 

@@ -4,6 +4,7 @@ only comments and labels; the App holds no other write permission."""
 import base64
 import datetime
 import logging
+import re
 import time
 from typing import Any
 
@@ -92,6 +93,21 @@ class GitHub:
             raise ValueError(f"not a repository of {self.settings.org}: {name!r}")
         return f"{self.settings.org}/{name}"
 
+    def public_repo(self, name: str) -> str:
+        """Any repository on GitHub, as owner/name; `file` refuses private ones."""
+        name = name.strip().removeprefix("https://github.com/").strip("/")
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", name) or ".." in name:
+            raise ValueError(f"not an owner/name repository: {name!r}")
+        return name
+
+    def releases(self, repo: str, limit: int = 10) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self.get(f"/repos/{repo}/releases", per_page=limit)
+        return result
+
+    def compare(self, repo: str, base: str, head: str) -> dict[str, Any]:
+        result: dict[str, Any] = self.get(f"/repos/{repo}/compare/{base}...{head}")
+        return result
+
     def issue(self, repo: str, number: int) -> dict[str, Any]:
         result: dict[str, Any] = self.get(f"/repos/{repo}/issues/{number}")
         return result
@@ -118,8 +134,9 @@ class GitHub:
             return base64.b64decode(data["content"]).decode("utf-8", errors="replace")
         return str(data.get("content") or "")
 
-    def search_issues(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
-        data = self.get("/search/issues", q=f"org:{self.settings.org} is:public {query}", per_page=limit)
+    def search_issues(self, query: str, limit: int = 10, org_only: bool = True) -> list[dict[str, Any]]:
+        scope = f"org:{self.settings.org} is:public" if org_only else "is:public"
+        data = self.get("/search/issues", q=f"{scope} {query}", per_page=limit)
         items: list[dict[str, Any]] = data.get("items") or []
         return items
 

@@ -31,6 +31,11 @@ class Settings:
     authors: Literal["all", "external"] = "all"
     """`all` answers members too (the demo); `external` answers only people outside the team (production)."""
     max_followups: int = 3
+    research_model: str = "claude-haiku-5-5"
+    research_effort: str = "medium"
+    research_turns: int = 10
+    max_research: int = 3
+    """Research calls Sonnet may make per thread."""
     max_turns: int = 16
     dry_run: bool = False
     """Run the model but post nothing: the comment and labels go to the log only."""
@@ -68,6 +73,10 @@ class Settings:
             monthly_cap_usd=float(env.get("TRIAGE_MONTHLY_CAP_USD", cls.monthly_cap_usd)),
             authors="all" if authors == "all" else "external",
             max_followups=int(env.get("TRIAGE_MAX_FOLLOWUPS", cls.max_followups)),
+            research_model=env.get("TRIAGE_RESEARCH_MODEL", cls.research_model),
+            research_effort=env.get("TRIAGE_RESEARCH_EFFORT", cls.research_effort),
+            research_turns=int(env.get("TRIAGE_RESEARCH_TURNS", cls.research_turns)),
+            max_research=int(env.get("TRIAGE_MAX_RESEARCH", cls.max_research)),
             max_turns=int(env.get("TRIAGE_MAX_TURNS", cls.max_turns)),
             dry_run=_bool(env.get("TRIAGE_DRY_RUN"), cls.dry_run),
             site_url=env.get("TRIAGE_SITE_URL", cls.site_url).rstrip("/"),
