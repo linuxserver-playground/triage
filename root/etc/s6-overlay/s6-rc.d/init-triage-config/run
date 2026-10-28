@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+# /config holds the App's private key (app.pem), triage.db and the cache of the hub and site clones
+mkdir -p \
+    /config/cache
+
+# permissions
+lsiown -R abc:abc \
+    /config
+chmod 700 \
+    /config
+if [[ -f /config/app.pem ]]; then
+    chmod 600 /config/app.pem
+fi

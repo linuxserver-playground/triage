@@ -1,0 +1,15 @@
+.venv/
+dist/
+__pycache__/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+# runtime data (the App private key, the run log and the clones)
+config/
+*.db
+*.db-wal
+*.db-shm
+.env
+*.pem

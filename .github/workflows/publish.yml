@@ -1,0 +1,45 @@
+# Runs the checks, then builds the triage image and publishes ghcr.io/linuxserver-playground/triage:latest on every
+# push to main. n97 deploys it by itself: the updater beside the container pulls :latest every few minutes
+# (deploy/n97/README.md), so merging to main is the deploy. amd64 only: the bot runs on n97 alone.
+name: Publish image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yml
+
+  build:
+    needs: check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Build and push
+        run: |
+          set -euo pipefail
+          docker buildx build \
+            --build-arg VERSION="${GITHUB_SHA::7}" \
+            --build-arg BUILD_DATE="$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --provenance=false --sbom=false \
+            --tag "${IMAGE}:latest" --tag "${IMAGE}:${GITHUB_SHA::7}" \
+            --push .
