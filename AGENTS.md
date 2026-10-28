@@ -12,7 +12,7 @@ Anthropic SDK, httpx, SQLite. No web server: it only makes outgoing requests.
   reads over them; `triage/github.py` the App's REST calls; `triage/state.py` what was seen and answered, and the
   cost of every run; `triage/__main__.py` run / once / spend.
 - `tests/` pytest with a fake GitHub (`FakeGitHub`) and a scripted model (`FakeClaude`) in `conftest.py`.
-- `root/` the s6 services; `deploy/n97/` the operator files.
+- `root/` the s6 services; `deploy/` the operator files.
 
 ## Checks
 
@@ -35,6 +35,6 @@ All must pass before a commit. A push to `main` is a deploy (Publish runs the ch
 - Keep the system prompt byte-stable within a run and between runs (it is cached): nothing per-thread or
   time-dependent goes into it.
 - Every model run is a `runs` row with its cost, and the monthly cap is checked before each run.
-- Secrets: `app.pem` and `.env` live only on n97. Never log the thread text or a key; log only ids, labels, cost
+- Secrets: `app.pem` and `.env` live only on the server that runs the bot. Never log the thread text or a key; log only ids, labels, cost
   and comment links.
 - Commit subjects are short imperative sentences with no trailers (CONVENTIONS §8).

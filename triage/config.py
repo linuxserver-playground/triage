@@ -1,4 +1,4 @@
-"""Settings from the environment. Every setting has a default that works on n97; only the two secrets
+"""Settings from the environment. Every setting has a default that works in production; only the two secrets
 (ANTHROPIC_API_KEY, read by the SDK itself, and the App's private key file) and TRIAGE_APP_ID must be set."""
 
 import os

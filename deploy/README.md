@@ -1,6 +1,6 @@
-# Deploying triage on n97
+# Deploying triage
 
-triage runs as one container beside control, in its own compose project. It publishes no port and joins no
+triage runs as one container on the server that runs control, in its own compose project. It publishes no port and joins no
 shared network: it only makes outgoing requests, to control's public API, GitHub and Anthropic.
 
 ## One time
@@ -17,7 +17,7 @@ shared network: it only makes outgoing requests, to control's public API, GitHub
 2. Create an Anthropic API key in its own workspace, with a monthly spend limit above the bot's own cap
    (`TRIAGE_MONTHLY_CAP_USD`, $100 by default), e.g. $150.
 
-3. Put both on n97:
+3. Put both on the server, in a directory of their own (`~/triage` here):
 
    ```bash
    mkdir -p ~/triage/config
@@ -31,18 +31,20 @@ shared network: it only makes outgoing requests, to control's public API, GitHub
    ```
 
 4. Copy `compose.yml` to `~/triage/compose.yml`, then check one real thread before the bot answers anything.
-   `once` runs the model on it and prints the comment and labels it would post; it posts nothing:
+   `once` runs the model on it and prints the comment and labels it would post; it posts nothing. Run every
+   compose command from `~/triage`: the compose file uses the directory it is run from.
 
    ```bash
-   docker compose -p triage -f ~/triage/compose.yml pull
-   docker compose -p triage -f ~/triage/compose.yml run --rm --entrypoint /lsiopy/bin/python \
+   cd ~/triage
+   docker compose -p triage pull
+   docker compose -p triage run --rm --entrypoint /lsiopy/bin/python \
      -e TRIAGE_DATA_DIR=/config triage -m triage once docker-heimdall 6
    ```
 
 5. Start it:
 
    ```bash
-   docker compose -p triage -f ~/triage/compose.yml up -d
+   docker compose -p triage up -d
    docker logs -f triage
    ```
 
@@ -51,7 +53,7 @@ shared network: it only makes outgoing requests, to control's public API, GitHub
 ## Settings
 
 Everything but the two secrets is a code default (`triage/config.py`). To override one, add it to `.env` and
-`docker compose -p triage -f ~/triage/compose.yml up -d triage`:
+`docker compose -p triage up -d triage` in `~/triage`:
 
 | Variable | Default | |
 | --- | --- | --- |
@@ -68,5 +70,5 @@ Everything but the two secrets is a code default (`triage/config.py`). To overri
 - `docker logs triage`: one line per thread it answers, with labels, cost and the comment link.
 - `docker exec triage /lsiopy/bin/python -m triage spend`: this month's spend and the newest runs.
 - A maintainer stops it on one thread with the `no-bot` label. To stop it everywhere, stop both services
-  (`docker compose -p triage -f ~/triage/compose.yml stop`): the updater's `up -d` would start a stopped bot
+  (`docker compose -p triage stop`): the updater's `up -d` would start a stopped bot
   again. `TRIAGE_DRY_RUN=true` keeps it running without posting.

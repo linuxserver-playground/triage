@@ -1,6 +1,6 @@
 # Runs the checks, then builds the triage image and publishes ghcr.io/linuxserver-playground/triage:latest on every
-# push to main. n97 deploys it by itself: the updater beside the container pulls :latest every few minutes
-# (deploy/n97/README.md), so merging to main is the deploy. amd64 only: the bot runs on n97 alone.
+# push to main. The server deploys it by itself: the updater beside the container pulls :latest every few
+# minutes (deploy/README.md), so merging to main is the deploy. amd64 only: the bot runs on one amd64 server.
 name: Publish image
 
 on:

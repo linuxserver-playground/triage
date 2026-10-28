@@ -27,9 +27,10 @@ model has no tool that writes, so the worst a successful injection can do is one
 ## Identity and cost
 
 The `lsio-playground-triage` GitHub App comments as `lsio-playground-triage[bot]`. It can read issues, pull
-requests, contents and Actions, and write only comments and labels. Its private key and the Anthropic API key live
-only on n97 (`deploy/n97/README.md`). The bot keeps a running total from each response's usage and stops for the
-month at `TRIAGE_MONTHLY_CAP_USD` ($100); the API workspace's spend limit is the backstop.
+requests, contents and Actions, and write only comments and labels. Its private key and the Anthropic API key
+live only on the server that runs it (`deploy/README.md`). The bot keeps a running total from each response's
+usage and stops for the month at `TRIAGE_MONTHLY_CAP_USD` ($100); the API workspace's spend limit is the
+backstop.
 
 ## Development
 
@@ -39,4 +40,4 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 ```
 
 The tests run against a fake GitHub and a scripted model client; none needs a key. A push to `main` publishes
-`ghcr.io/linuxserver-playground/triage:latest`, and n97's updater deploys it within five minutes.
+`ghcr.io/linuxserver-playground/triage:latest`, and the updater beside it deploys it within five minutes.
